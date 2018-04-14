@@ -8,17 +8,24 @@ The program will run once for each execution based on the trigger/schedule you s
 
 # Twitter API
 
-You will need to [create a new Twitter application and generate API keys](https://apps.twitter.com/). The program assumes the following environment variables are set:
+You will need to [create a new Twitter application and generate API keys](https://apps.twitter.com/). The program assumes the following secrets are set under a single secret in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/):
+Secrets Manager does not have a Free Tier option but is not expensive for the added security.
 
 ```
 TWITTER_CONSUMER_KEY
 TWITTER_CONSUMER_SECRET
 TWITTER_ACCESS_TOKEN
 TWITTER_ACCESS_TOKEN_SECRET
-MAX_TWEET_AGE
 ```
 
-`MAX_TWEET_AGE` expects a value of hours, such as: `MAX_TWEET_AGE=72h`
+And the following needs to be set as environment variables:
+```
+MAX_TWEET_AGE
+SECRET_ARN
+```
+
+`MAX_TWEET_AGE` expects a value of hours, example: `MAX_TWEET_AGE=72h` (Make sure to end with `h`)
+`SECRET_ARN` expects the full ARN of the secret, example: `arn:aws:secretsmanager:us-east-2:000000000000:secret:ephemeralTweets-Uf8NON`
 
 You can set these variables in AWS Lambda when you create your Lambda function. For a full walkthrough with screenshots on creating a Lambda function and uploading the code, read [this blog post](https://vickylai.com/verbose/aws-lambda/). Skip to setting environment variables at [this link](https://vickylai.com/verbose/aws-lambda/#2-configure-your-function).
 
