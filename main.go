@@ -16,6 +16,7 @@ var (
 	accessToken       = getenv("TWITTER_ACCESS_TOKEN")
 	accessTokenSecret = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 	maxTweetAge       = getenv("MAX_TWEET_AGE")
+	maxFavoriteAge    = getenv("MAX_FAVORITE_AGE")
 	logger            = log.New()
 )
 
@@ -59,7 +60,39 @@ func deleteFromTimeline(api *anaconda.TwitterApi, ageLimit time.Duration) {
 		}
 	}
 	log.Info("No more tweets to delete.")
+}
 
+func getFavorites(api *anaconda.TwitterApi) ([]anaconda.Tweet, error) {
+	args := url.Values{}
+	args.Add("count", "200")       // Twitter only returns most recent 20 tweets by default, so override
+	timeline, err := api.GetFavorites(args)
+	if err != nil {
+		return make([]anaconda.Tweet, 0), err
+	}
+	return timeline, nil
+}
+
+func unfavorite(api *anaconda.TwitterApi, ageLimit time.Duration) {
+	favorites, err := getFavorites(api)
+
+	if err != nil {
+		log.Error("Could not get favorites")
+	}
+	for _, f := range favorites {
+		createdTime, err := f.CreatedAtTime()
+		if err != nil {
+			log.Error("Couldn't parse time ", err)
+		} else {
+			if time.Since(createdTime) > ageLimit {
+				_, err := api.Unfavorite(f.Id)
+				log.Info("UNFAVORITED: Age - ", time.Since(createdTime).Round(1*time.Minute), " - ", f.Text)
+				if err != nil {
+					log.Error("Failed to unfavorite! ", err)
+				}
+			}
+		}
+	}
+	log.Info("No more tweets to unfavorite.")
 }
 
 func ephemeral() {
@@ -73,14 +106,13 @@ func ephemeral() {
 	log.SetFormatter(fmter)
 	log.SetLevel(log.InfoLevel)
 
-	h, _ := time.ParseDuration(maxTweetAge)
+	ht, _ := time.ParseDuration(maxTweetAge)
+	deleteFromTimeline(api, ht)
 
-	deleteFromTimeline(api, h)
-
+	hf, _ := time.ParseDuration(maxFavoriteAge)
+	unfavorite(api, hf)
 }
 
 func main() {
-
 	lambda.Start(ephemeral)
-
 }
