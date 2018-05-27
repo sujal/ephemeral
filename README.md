@@ -6,6 +6,8 @@ You can use ephemeral to automatically delete all tweets from your timeline that
 
 The program will run once for each execution based on the trigger/schedule you set in AWS Lambda. It will delete up to 200 expired tweets (per-request limit set by Twitter's API) each run.
 
+*Update: I forked this from [Vicky Lai's project](https://github.com/vickylai/ephemeral) in order to support removing old favorites (aka "likes") too.*
+
 # Twitter API
 
 You will need to [create a new Twitter application and generate API keys](https://apps.twitter.com/). The program assumes the following environment variables are set:
@@ -16,9 +18,10 @@ TWITTER_CONSUMER_SECRET
 TWITTER_ACCESS_TOKEN
 TWITTER_ACCESS_TOKEN_SECRET
 MAX_TWEET_AGE
+MAX_FAVORITE_AGE
 ```
 
-`MAX_TWEET_AGE` expects a value of hours, such as: `MAX_TWEET_AGE=72h`
+`MAX_TWEET_AGE` and `MAX_FAVORITE_AGE` expect a value of hours, such as: `MAX_TWEET_AGE=72h`
 
 You can set these variables in AWS Lambda when you create your Lambda function. For a full walkthrough with screenshots on creating a Lambda function and uploading the code, read [this blog post](https://vickylai.com/verbose/free-twitter-bot-aws-lambda/). Skip to setting environment variables at [this link](https://vickylai.com/verbose/free-twitter-bot-aws-lambda/#2-configure-your-function).
 
