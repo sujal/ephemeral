@@ -1,3 +1,5 @@
+*NOTE: This is forked from [Vicky Lai's project](https://github.com/vickylai/ephemeral) in order to support removing old favorites (aka "likes") too.*
+
 # ephemeral: automatically delete your old Tweets with AWS Lambda
 
 **ephemeral** is a Twitter timeline grooming program that runs for pretty much free on AWS Lambda. The code is forked from Adam Drake's excellent [Harold](https://github.com/adamdrake/harold) butler-like bot and refactored for Lambda.
@@ -5,8 +7,6 @@
 You can use ephemeral to automatically delete all tweets from your timeline that are older than a certain number of hours that you can choose. For instance, you can ensure that your tweets are deleted after one week (168h), or one day (24h).
 
 The program will run once for each execution based on the trigger/schedule you set in AWS Lambda. It will delete up to 200 expired tweets (per-request limit set by Twitter's API) each run.
-
-*Update: I forked this from [Vicky Lai's project](https://github.com/vickylai/ephemeral) in order to support removing old favorites (aka "likes") too.*
 
 # Twitter API
 
