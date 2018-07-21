@@ -4,22 +4,70 @@ import (
 	"net/url"
 	"os"
 	"time"
+	"fmt"
+    "encoding/json"
+    "reflect"
 
 	log "github.com/Sirupsen/logrus"
 	
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws/session"
+    "github.com/aws/aws-sdk-go/service/secretsmanager"
 )
 
 var (
-	consumerKey       = getenv("TWITTER_CONSUMER_KEY")
-	consumerSecret    = getenv("TWITTER_CONSUMER_SECRET")
-	accessToken       = getenv("TWITTER_ACCESS_TOKEN")
-	accessTokenSecret = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 	maxTweetAge       = getenv("MAX_TWEET_AGE")
 	maxFavoriteAge    = getenv("MAX_FAVORITE_AGE")
+	secretARN         = getenv("SECRET_ARN")
+
 	logger            = log.New()
+
+    consumerKey       = getsecret("TWITTER_CONSUMER_KEY")
+    consumerSecret    = getsecret("TWITTER_CONSUMER_SECRET")
+    accessToken       = getsecret("TWITTER_ACCESS_TOKEN")
+    accessTokenSecret = getsecret("TWITTER_ACCESS_TOKEN_SECRET")
 )
+
+type Secret struct {
+    TWITTER_CONSUMER_KEY string
+    TWITTER_CONSUMER_SECRET string
+    TWITTER_ACCESS_TOKEN string
+    TWITTER_ACCESS_TOKEN_SECRET string
+}
+
+func getField(s *Secret, field string) string {
+    r := reflect.ValueOf(s)
+    f := reflect.Indirect(r).FieldByName(field)
+    return f.String()
+}
+
+func getsecret(name string) string {
+    sess, err := session.NewSession()
+    if err != nil {
+        fmt.Println("Got error creating new session")
+        fmt.Println(err.Error())
+        os.Exit(1)
+    }
+
+    svc := secretsmanager.New(sess)
+    secret, err := svc.GetSecretValue(&secretsmanager.GetSecretValueInput{SecretId: &secretARN})
+    if err != nil {
+        fmt.Println("Got error fetching secret")
+        fmt.Println(err.Error())
+        os.Exit(1)
+    }
+
+    var s Secret
+    err = json.Unmarshal([]byte(*secret.SecretString), &s)
+    if err != nil {
+        fmt.Println("Got error converting secret from JSON")
+        fmt.Println(err.Error())
+        os.Exit(1)
+    }
+    secret_value := getField(&s, name)
+    return secret_value
+}
 
 func getenv(name string) string {
 	v := os.Getenv(name)
