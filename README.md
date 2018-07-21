@@ -1,4 +1,4 @@
-*NOTE: This is forked from [Vicky Lai's project](https://github.com/vickylai/ephemeral) in order to support removing old favorites (aka "likes") too.*
+*NOTE: This is forked from [Vicky Lai's project](https://github.com/vickylai/ephemeral) with work from several other authors merged in.*
 
 # ephemeral: automatically delete your old Tweets with AWS Lambda
 
@@ -10,37 +10,28 @@ The program will run once for each execution based on the trigger/schedule you s
 
 # Twitter API
 
-You will need to [create a new Twitter application and generate API keys](https://apps.twitter.com/). The program assumes the following environment variables are set:
+You will need to [create a new Twitter application and generate API keys](https://apps.twitter.com/). The program assumes the following secrets are set under a single secret in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/).  
+Secrets Manager does not have a Free Tier option but is not expensive for the added security.
 
 ```
 TWITTER_CONSUMER_KEY
 TWITTER_CONSUMER_SECRET
 TWITTER_ACCESS_TOKEN
 TWITTER_ACCESS_TOKEN_SECRET
-MAX_TWEET_AGE
-MAX_FAVORITE_AGE
 ```
 
-`MAX_TWEET_AGE` and `MAX_FAVORITE_AGE` expect a value of hours, such as: `MAX_TWEET_AGE=72h`
+And the following needs to be set as environment variables.
+```
+MAX_TWEET_AGE
+MAX_FAVORITE_AGE
+SECRET_ARN
+```
+
+`MAX_TWEET_AGE` and `MAX_FAVORITE_AGE` expects a value of hours, example: `MAX_TWEET_AGE=72h` (Make sure to end the value with `h` or equivalent)  
+`SECRET_ARN` expects the full ARN of the secret, example: `arn:aws:secretsmanager:us-east-2:000000000000:secret:ephemeralTweets-Uf8NON`
 
 You can set these variables in AWS Lambda when you create your Lambda function. For a full walkthrough with screenshots on creating a Lambda function and uploading the code, read [this blog post](https://vickylai.com/verbose/free-twitter-bot-aws-lambda/). Skip to setting environment variables at [this link](https://vickylai.com/verbose/free-twitter-bot-aws-lambda/#2-configure-your-function).
 
 # update.sh
 
 This handy bash script is included to help you upload your function code to Lambda. It requires [AWS Command Line Interface](https://aws.amazon.com/cli/). To set up, do `pip install awscli` and follow these instructions for [Quick Configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).
-
-# License
-Copyright (C) 2018 Vicky Lai
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
