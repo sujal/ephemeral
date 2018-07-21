@@ -1,0 +1,22 @@
+Resources:
+  EphemeralTweets:
+    Type: AWS::Lambda::Function
+    Code:
+      S3Bucket: code.eb.forchesoftware.com
+      S3Key: /code/empheralTweets.zip
+    Handler: "ephemeralTweets"
+    Role: Fn.GetAtt(ETLambdaExecutionRole,"Arn")
+    Runtime: "go1.x"
+  EPLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    AssumeRolePolicyDocument:
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - lambda.amazonaws.com
+          Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - Role: arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
