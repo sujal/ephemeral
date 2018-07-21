@@ -25,10 +25,12 @@ And the following needs to be set as environment variables.
 MAX_TWEET_AGE
 MAX_FAVORITE_AGE
 SECRET_ARN
+IGNORE_TWEETS (optional)
 ```
 
 `MAX_TWEET_AGE` and `MAX_FAVORITE_AGE` expects a value of hours, example: `MAX_TWEET_AGE=72h` (Make sure to end the value with `h` or equivalent)  
 `SECRET_ARN` expects the full ARN of the secret, example: `arn:aws:secretsmanager:us-east-2:000000000000:secret:ephemeralTweets-Uf8NON`
+`IGNORE_TWEETS` expects a comma delimited string of tweet IDs that you do not want to delete.
 
 You can set these variables in AWS Lambda when you create your Lambda function. For a full walkthrough with screenshots on creating a Lambda function and uploading the code, read [this blog post](https://vickylai.com/verbose/free-twitter-bot-aws-lambda/). Skip to setting environment variables at [this link](https://vickylai.com/verbose/free-twitter-bot-aws-lambda/#2-configure-your-function).
 
