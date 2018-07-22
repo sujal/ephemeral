@@ -1,22 +1,51 @@
 Resources:
   EphemeralTweets:
+    DependsOn: ETLambdaExecutionRole
     Type: AWS::Lambda::Function
-    Code:
-      S3Bucket: code.eb.forchesoftware.com
-      S3Key: /code/empheralTweets.zip
-    Handler: "ephemeralTweets"
-    Role: Fn.GetAtt(ETLambdaExecutionRole,"Arn")
-    Runtime: "go1.x"
-  EPLambdaExecutionRole:
-    Type: AWS::IAM::Role
-    AssumeRolePolicyDocument:
-      Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-              - lambda.amazonaws.com
-          Action:
+    Properties:
+      Code:
+        S3Bucket: code.eb.forchesoftware.com
+        S3Key: code/ephemeralTweets.zip
+      Handler: "ephemeralTweets"
+      Role: !GetAtt ETLambdaExecutionRole.Arn
+      Runtime: "go1.x"
+  ETLambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
               - sts:AssumeRole
       Path: /
       ManagedPolicyArns:
-        - Role: arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  ETTimerRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description: The schedule that the lamdba runs
+      ScheduleExpression: "cron(0 * * * ? *)"
+      State: "ENABLED"
+      Targets:
+        -
+          Arn:
+            Fn::GetAtt:
+              - "EphemeralTweets"
+              - "Arn"
+          Id: "TargetFunctionV1"
+  PermissionForEventsToInvokeET:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Ref: EphemeralTweets
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn:
+        Fn::GetAtt:
+          - "ETTimerRule"
+          - "Arn"
