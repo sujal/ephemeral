@@ -1,3 +1,16 @@
+Parameters:
+  SecretArn:
+    Type: String
+    Description: the ARN for the secrets stored in Secrets Manager
+  MaxTweetAge:
+    Type: String
+    Description: The max age in tweets in a parseable format, i.e. 72h
+  MaxFavoriteAge:
+    Type: String
+    Description: The max age of favorites to keep in a parseable format, i.e. 72h
+  IgnoreTweets:
+    Type: String
+    Description: A string that has a comma-joined list of tweet IDs to keep
 Resources:
   EphemeralTweets:
     DependsOn: ETLambdaExecutionRole
@@ -9,6 +22,12 @@ Resources:
       Handler: "ephemeralTweets"
       Role: !GetAtt ETLambdaExecutionRole.Arn
       Runtime: "go1.x"
+      Environment:
+        Variables:
+          MAX_TWEET_AGE: !Ref MaxTweetAge
+          MAX_FAVORITE_AGE: !Ref MaxFavoriteAge
+          SECRET_ARN: !Ref SecretArn
+          IGNORE_TWEETS: !Ref IgnoreTweets
   ETLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
