@@ -89,6 +89,7 @@ func getsecret(name string) string {
     sess, err := session.NewSession()
     if err != nil {
         log.Error("Got error creating new session")
+        log.Error(err)
         os.Exit(1)
     }
 
@@ -96,6 +97,7 @@ func getsecret(name string) string {
     secret, err := svc.GetSecretValue(&secretsmanager.GetSecretValueInput{SecretId: &secretARN})
     if err != nil {
         log.Error("Got error fetching secret")
+        log.Error(err)
         os.Exit(1)
     }
 
@@ -103,6 +105,7 @@ func getsecret(name string) string {
     err = json.Unmarshal([]byte(*secret.SecretString), &s)
     if err != nil {
         log.Error("Got error converting secret from JSON")
+        log.Error(err)
         os.Exit(1)
     }
     secret_value := getField(&s, name)

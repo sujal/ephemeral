@@ -28,6 +28,7 @@ Resources:
           MAX_FAVORITE_AGE: !Ref MaxFavoriteAge
           SECRET_ARN: !Ref SecretArn
           IGNORE_TWEETS: !Ref IgnoreTweets
+      Timeout: 120
   ETLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -40,15 +41,29 @@ Resources:
               Service:
                 - lambda.amazonaws.com
             Action:
-              - sts:AssumeRole
+              - sts:AssumeRole                
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  ETSecretAccessPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: EphemeralTweetsSecretAccessPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: Allow
+            Action: "secretsmanager:GetSecretValue"
+            Resource: !Ref SecretArn
+      Roles:
+        -
+          Ref: ETLambdaExecutionRole
   ETTimerRule:
     Type: "AWS::Events::Rule"
     Properties:
       Description: The schedule that the lamdba runs
-      ScheduleExpression: "cron(0 * * * ? *)"
+      ScheduleExpression: "cron(5 0 * * ? *)"
       State: "ENABLED"
       Targets:
         -
