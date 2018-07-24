@@ -60,6 +60,6 @@ There is a Cloudformation template included in the project, along with a few scr
 2. Take note of the ARN for the new secret you've created.
 3. Tap the Launch Stack button to get started:
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=EphemeralTweets&templateURL=https://code.eb.forchesoftware.com.s3.amazonaws.com/code/EphemeralTweets.template">![launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)</a>
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=EphemeralTweets&templateURL=https://code.eb.forchesoftware.com.s3.amazonaws.com/templates/EphemeralTweets.template">![launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)</a>
 
 That should get you going. You'll need to enter in the times you want for the age parameters (See the section above for details). You will also need the ARN for the secreate you created in step 1.
