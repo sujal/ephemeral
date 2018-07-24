@@ -27,4 +27,4 @@ if [ -z $MAX_FAVORITE_AGE ]; then
 fi
 
 
-aws cloudformation create-stack --stack-name sujalEphemeralTweets --template-url $TEMPLATE_URL --capabilities CAPABILITY_IAM --parameters ParameterKey=SecretArn,ParameterValue=$SECRET_ARN ParameterKey=MaxTweetAge,ParameterValue=$MAX_TWEET_AGE ParameterKey=MaxFavoriteAge,ParameterValue=$MAX_FAVORITE_AGE ParameterKey=IgnoreTweets,ParameterValue=$IGNORE_TWEET_LIST
+aws cloudformation create-stack --stack-name EphemeralTweets --template-url $TEMPLATE_URL --capabilities CAPABILITY_IAM --parameters ParameterKey=SecretArn,ParameterValue=$SECRET_ARN ParameterKey=MaxTweetAge,ParameterValue=$MAX_TWEET_AGE ParameterKey=MaxFavoriteAge,ParameterValue=$MAX_FAVORITE_AGE ParameterKey=IgnoreTweets,ParameterValue=$IGNORE_TWEET_LIST
