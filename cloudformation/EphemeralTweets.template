@@ -63,7 +63,7 @@ Resources:
     Type: "AWS::Events::Rule"
     Properties:
       Description: The schedule that the lamdba runs
-      ScheduleExpression: "cron(5 0/4 * * ? *)"
+      ScheduleExpression: "cron(5 0 * * ? *)"
       State: "ENABLED"
       Targets:
         -
