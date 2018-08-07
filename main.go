@@ -120,10 +120,16 @@ func getenv(name string) string {
     return v
 }
 
-func getTimeline(api *anaconda.TwitterApi) ([]anaconda.Tweet, error) {
+func getTimeline(api *anaconda.TwitterApi, maxId int64) ([]anaconda.Tweet, error) {
     args := url.Values{}
     args.Add("count", "200")       // Twitter only returns most recent 20 tweets by default, so override
     args.Add("include_rts", "true") // When using count argument, RTs are excluded, so include them as recommended
+    if (maxId > 0) {
+        args.Add("max_id", strconv.FormatInt(maxId,10))
+    }
+
+    log.Info("Getting tweets: ", args)
+
     timeline, err := api.GetUserTimeline(args)
     if err != nil {
         return make([]anaconda.Tweet, 0), err
@@ -141,29 +147,56 @@ func stringInSlice(a string, list []string) bool {
 }
 
 func deleteFromTimeline(api *anaconda.TwitterApi, ageLimit time.Duration) {
-    timeline, err := getTimeline(api)
 
-    if err != nil {
-        log.Error("Could not get timeline")
-    }
-    for _, t := range timeline {
-        createdTime, err := t.CreatedAtTime()
+    var maxTweetSeenId int64
+    var loopCount int8
+
+    for {
+
+        timeline, err := getTimeline(api, maxTweetSeenId-1)
+
+        log.Info("Timeline data length: ", len(timeline))
+
+        // don't loop indefinitely and don't process if the timeline is empty. Probably no more tweets.
+        timelineLength := len(timeline)
+        if timelineLength == 0 || loopCount > 16 {
+            break
+        }
+
         if err != nil {
-            log.Error("Couldn't parse time ", err)
-        } else {
-            if time.Since(createdTime) > ageLimit {
-                if stringInSlice(strconv.FormatInt(t.Id, 10), ignoreTweets) {
-                    log.Info("Ignoring tweet while deleting " + strconv.FormatInt(t.Id, 10))
-                    break
-                }
-                _, err := api.DeleteTweet(t.Id, true)
-                log.Info("DELETED: Age - ", time.Since(createdTime).Round(1*time.Minute), " - ", t.Text)
-                if err != nil {
-                    log.Error("Failed to delete! ", err)
+            log.Error("Could not get timeline")
+        }
+        for _, t := range timeline {
+            createdTime, err := t.CreatedAtTime()
+            if err != nil {
+                log.Error("Couldn't parse time ", err)
+            } else {
+                if time.Since(createdTime) > ageLimit {
+                    if stringInSlice(strconv.FormatInt(t.Id, 10), ignoreTweets) {
+                        log.Info("Ignoring tweet while deleting " + strconv.FormatInt(t.Id, 10))
+                        break
+                    }
+                    _, err := api.DeleteTweet(t.Id, true)
+                    log.Info("DELETED: Age - ", time.Since(createdTime).Round(1*time.Minute), " - ", t.Text)
+                    if err != nil {
+                        log.Error("Failed to delete ", t.Id, "! ", err)
+                    }
                 }
             }
+
+            maxTweetSeenId = t.Id
+
         }
+
+        // short circuit if it's safely the "last" page. I'm just using the 190 number as an arbitrary cutoff.
+        if timelineLength < 190 {
+            break
+        }
+
+        loopCount++
+
     }
+
     log.Info("No more tweets to delete.")
 
 }
